@@ -4,6 +4,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 
@@ -39,12 +42,14 @@ public class ScopeClassGenerator {
                 .map(element -> (ExecutableElement) element)
                 .forEach(method -> {
                     method.getAnnotationMirrors().stream()
-                            .filter(annotationMirror -> annotationMirror.toString().equals(getAnnotationName()))
+                            .filter(annotationMirror -> annotationMirror.toString().equals(getInitializeAnnotationName()))
                             .forEach(annotation -> builder.addMethod(getInitializeMethod(method)));
 
                     if(method.getSimpleName().toString().equals(INITIALIZE_IMPL))
                         builder.addMethod(getInitializeScopesMethod(method));
                 });
+
+        builder.addMethods(getScopedMethodScopes());
 
         return builder.build();
     }
@@ -63,18 +68,42 @@ public class ScopeClassGenerator {
                 .map(element -> (ExecutableElement) element)
                 .forEach(method -> {
                     method.getAnnotationMirrors().stream()
-                            .filter(annotationMirror -> annotationMirror.toString().equals(getAnnotationName()))
-                            .forEach(annotation ->builder.addStatement("$N()", method.getSimpleName().toString()));
+                            .filter(annotationMirror -> annotationMirror.toString().equals(getInitializeAnnotationName()))
+                            .forEach(annotation -> builder.addStatement("$N()", method.getSimpleName().toString()));
                 });
 
         return builder.build();
+    }
+
+    private List<MethodSpec> getScopedMethodScopes() {
+        List<MethodSpec> methodSpecList = new ArrayList<>();
+
+        annotatedClazz.annotatedElement.getEnclosedElements().stream()
+                .filter(element -> element instanceof ExecutableElement)
+                .map(element -> (ExecutableElement) element)
+                .forEach(method -> {
+                    method.getAnnotationMirrors().stream()
+                            .filter(annotationMirror -> annotationMirror.toString().equals(getScopeAnnotationName()))
+                            .forEach(annotation -> {
+                                MethodSpec overrideSpec = MethodSpec.overriding(method)
+                                        .addStatement("super.$N()", method.getSimpleName())
+                                        .build();
+                                methodSpecList.add(overrideSpec);
+                            });
+                });
+
+        return methodSpecList;
     }
 
     private String getClazzPrefixName(String scopeName) {
         return this.annotatedClazz.clazzName + SCOPE_PREFIX + scopeName;
     }
 
-    private String getAnnotationName() {
+    private String getInitializeAnnotationName() {
         return "@" + SCOPE_INITIALIZE + scopeName + SCOPE_PREFIX;
+    }
+
+    private String getScopeAnnotationName() {
+        return "@" + scopeName + SCOPE_PREFIX;
     }
 }
