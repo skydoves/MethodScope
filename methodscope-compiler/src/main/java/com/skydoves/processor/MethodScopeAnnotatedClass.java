@@ -18,6 +18,7 @@ package com.skydoves.processor;
 
 import com.google.common.base.VerifyException;
 import com.skydoves.methodscope.MethodScope;
+import com.skydoves.methodscope.ScopeAnnotation;
 import com.skydoves.methodscope.ScopeInitializer;
 import com.squareup.javapoet.TypeName;
 
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
@@ -35,6 +38,7 @@ public class MethodScopeAnnotatedClass {
     public final String packageName;
     public final String clazzName;
     public final List<String> scopeList;
+    public final List<AnnotationMirror> scopeAnnotationList;
     private boolean checkScopeInitializer = false;
 
     public MethodScopeAnnotatedClass(TypeElement annotatedElement, Elements elementUtils) throws VerifyException {
@@ -44,6 +48,7 @@ public class MethodScopeAnnotatedClass {
         this.annotatedElement = annotatedElement;
         this.clazzName = annotatedElement.getSimpleName().toString();
         this.scopeList = new ArrayList<>();
+        this.scopeAnnotationList = new ArrayList<>();
 
         Arrays.stream(methodScope.scopes()).forEach(scope -> {
             if(!scopeList.contains(scope)) {
@@ -57,6 +62,16 @@ public class MethodScopeAnnotatedClass {
                 .forEach(impl -> checkScopeInitializer = true);
 
         checkScopeInitializerImplemented();
+
+        annotatedElement.getAnnotationMirrors().forEach(annotationMirror -> {
+            Element element = annotationMirror.getAnnotationType().asElement();
+            element.getAnnotationMirrors().forEach(annotation -> {
+                if(annotation.toString().equals("@" + ScopeAnnotation.class.getName())) {
+                    annotationMirror.getElementValues().forEach((method, value) ->
+                            this.scopeAnnotationList.add(annotationMirror));
+                }
+            });
+        });
     }
 
     private void checkScopeInitializerImplemented() {

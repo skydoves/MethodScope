@@ -25,4 +25,8 @@ dependencies {
 
     implementation project(":methodscope")
     annotationProcessor project(":methodscope-compiler")
+
+    // DeepLink
+    implementation "com.airbnb:deeplinkdispatch:3.1.1"
+    annotationProcessor "com.airbnb:deeplinkdispatch-processor:3.1.1"
 }

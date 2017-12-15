@@ -41,7 +41,9 @@ import javax.lang.model.element.TypeElement;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes({"com.skydoves.methodscope.MethodScope"})
+@SupportedAnnotationTypes({
+        "com.skydoves.methodscope.MethodScope",
+        "com.skydoves.methodscope.ScopeAnnotation"})
 @AutoService(Processor.class)
 public class MethodScopeProcessor extends AbstractProcessor {
 
