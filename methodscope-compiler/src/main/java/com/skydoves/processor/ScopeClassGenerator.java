@@ -21,6 +21,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.ExecutableElement;
@@ -63,7 +64,12 @@ public class ScopeClassGenerator {
         this.annotatedClazz.scopeAnnotationList.forEach(annotationMirror -> {
             annotationMirror.getElementValues().forEach((method, value) -> {
                 if(method.getSimpleName().toString().equals(VALUE_SCOPES)) {
-
+                    String[] values = value.getValue().toString().split(",");
+                    List<String> valueList = Arrays.asList(values);
+                    valueList.stream().filter(scopeName -> scopeName.replace("\"", "").equals(this.scopeName))
+                            .forEach(scope -> {
+                                
+                            });
                 }
             });
         });

@@ -13,7 +13,7 @@ import com.skydoves.methodscope.ScopeInitializer;
 
 @MethodScope(scopes = { "Test", "Power" })
 @DeepLinkScopeAnnotation(
-        scopes = { TestScope.class, PowerScope.class },
+        scopes = { "Test", "Power" },
         values = { @DeepLink("https://www.naver.com"), @DeepLink("https://google.com") })
 public class MainActivity extends AppCompatActivity implements ScopeInitializer {
 

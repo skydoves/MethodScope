@@ -10,6 +10,6 @@ import com.skydoves.methodscope.ScopeAnnotation;
 
 @ScopeAnnotation
 public @interface DeepLinkScopeAnnotation {
-    Class[] scopes();
+    String[] scopes();
     DeepLink[] values();
 }

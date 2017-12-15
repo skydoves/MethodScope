@@ -72,7 +72,7 @@ public class MethodScopeAnnotatedClass {
                 if(annotation.toString().equals("@" + ScopeAnnotation.class.getName())) {
                     annotationMirror.getElementValues().forEach((method, value) -> {
                         if(!(method.getSimpleName().toString().equals(VALUE_SCOPES) || method.getSimpleName().toString().equals(VALUE_VALUES)))
-                            throw new VerifyException("ScopeAnnotation must has only Class[] scopes() and @Annotation[] values() methods.");
+                            throw new VerifyException("ScopeAnnotation must has only String[] scopes() and @Annotation[] values() methods.");
                         this.scopeAnnotationList.add(annotationMirror);
                     });
                 }
