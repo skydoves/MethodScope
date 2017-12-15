@@ -11,9 +11,10 @@ import com.airbnb.deeplinkdispatch.DeepLink;
 import com.skydoves.methodscope.MethodScope;
 import com.skydoves.methodscope.ScopeInitializer;
 
-@MethodScope(scopes = {"Test", "Power"})
-@DeepLinkScopeAnnotation(scopes = {TestScope.class, PowerScope.class},
-        values = {@DeepLink("https://www.naver.com"), @DeepLink("https://google.com")})
+@MethodScope(scopes = { "Test", "Power" })
+@DeepLinkScopeAnnotation(
+        scopes = { TestScope.class, PowerScope.class },
+        values = { @DeepLink("https://www.naver.com"), @DeepLink("https://google.com") })
 public class MainActivity extends AppCompatActivity implements ScopeInitializer {
 
     private String text = "hello, methodScope";

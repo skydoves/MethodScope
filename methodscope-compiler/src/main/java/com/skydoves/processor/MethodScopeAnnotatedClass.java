@@ -41,6 +41,9 @@ public class MethodScopeAnnotatedClass {
     public final List<AnnotationMirror> scopeAnnotationList;
     private boolean checkScopeInitializer = false;
 
+    private static final String VALUE_SCOPES = "scopes";
+    private static final String VALUE_VALUES = "values";
+
     public MethodScopeAnnotatedClass(TypeElement annotatedElement, Elements elementUtils) throws VerifyException {
         MethodScope methodScope = annotatedElement.getAnnotation(MethodScope.class);
         PackageElement packageElement = elementUtils.getPackageOf(annotatedElement);
@@ -67,8 +70,11 @@ public class MethodScopeAnnotatedClass {
             Element element = annotationMirror.getAnnotationType().asElement();
             element.getAnnotationMirrors().forEach(annotation -> {
                 if(annotation.toString().equals("@" + ScopeAnnotation.class.getName())) {
-                    annotationMirror.getElementValues().forEach((method, value) ->
-                            this.scopeAnnotationList.add(annotationMirror));
+                    annotationMirror.getElementValues().forEach((method, value) -> {
+                        if(!(method.getSimpleName().toString().equals(VALUE_SCOPES) || method.getSimpleName().toString().equals(VALUE_VALUES)))
+                            throw new VerifyException("ScopeAnnotation must has only Class[] scopes() and @Annotation[] values() methods.");
+                        this.scopeAnnotationList.add(annotationMirror);
+                    });
                 }
             });
         });

@@ -36,6 +36,9 @@ public class ScopeClassGenerator {
     private final String INITIALIZE_IMPL = "initializeScopes";
     private static final String SCOPE_INITIALIZE = "Init";
 
+    private static final String VALUE_SCOPES = "scopes";
+    private static final String VALUE_VALUES = "values";
+
     public ScopeClassGenerator(MethodScopeAnnotatedClass annotatedClazz, String packageName, String scopeName) {
         this.annotatedClazz = annotatedClazz;
         this.packageName = packageName;
@@ -48,7 +51,26 @@ public class ScopeClassGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(TypeName.get(annotatedClazz.annotatedElement.asType()));
 
-        annotatedClazz.annotatedElement.getEnclosedElements().stream()
+        addScopeAnnotations(builder);
+        addInitializeScopesMethod(builder);
+
+        builder.addMethods(getScopedMethodScopes());
+
+        return builder.build();
+    }
+
+    private void addScopeAnnotations(TypeSpec.Builder builder) {
+        this.annotatedClazz.scopeAnnotationList.forEach(annotationMirror -> {
+            annotationMirror.getElementValues().forEach((method, value) -> {
+                if(method.getSimpleName().toString().equals(VALUE_SCOPES)) {
+
+                }
+            });
+        });
+    }
+
+    private void addInitializeScopesMethod(TypeSpec.Builder builder) {
+        this.annotatedClazz.annotatedElement.getEnclosedElements().stream()
                 .filter(element -> element instanceof ExecutableElement)
                 .map(element -> (ExecutableElement) element)
                 .forEach(method -> {
@@ -59,10 +81,6 @@ public class ScopeClassGenerator {
                     if(method.getSimpleName().toString().equals(INITIALIZE_IMPL))
                         builder.addMethod(getInitializeScopesMethod(method));
                 });
-
-        builder.addMethods(getScopedMethodScopes());
-
-        return builder.build();
     }
 
     private MethodSpec getInitializeMethod(ExecutableElement method) {
