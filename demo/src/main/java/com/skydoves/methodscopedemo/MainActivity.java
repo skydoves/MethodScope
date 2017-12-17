@@ -14,7 +14,7 @@ import com.skydoves.methodscope.ScopeInitializer;
 @MethodScope(scopes = { "Test", "Power" })
 @DeepLinkScopeAnnotation(
         scopes = { "Test", "Power" },
-        values = { @DeepLink("https://www.naver.com"), @DeepLink("https://google.com") })
+        values = { @DeepLink( value = "https://www.naver.com"), @DeepLink("https://google.com") })
 public class MainActivity extends AppCompatActivity implements ScopeInitializer {
 
     private String text = "hello, methodScope";
@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements ScopeInitializer 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initializeScopes();
+
     }
 
     @Override

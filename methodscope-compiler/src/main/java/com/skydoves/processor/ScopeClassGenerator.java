@@ -16,6 +16,10 @@
 
 package com.skydoves.processor;
 
+import com.google.common.base.VerifyException;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -62,17 +66,27 @@ public class ScopeClassGenerator {
 
     private void addScopeAnnotations(TypeSpec.Builder builder) {
         this.annotatedClazz.scopeAnnotationList.forEach(annotationMirror -> {
-            annotationMirror.getElementValues().forEach((method, value) -> {
-                if(method.getSimpleName().toString().equals(VALUE_SCOPES)) {
-                    String[] values = value.getValue().toString().split(",");
-                    List<String> valueList = Arrays.asList(values);
-                    valueList.stream().filter(scopeName -> scopeName.replace("\"", "").equals(this.scopeName))
-                            .forEach(scope -> {
-                                
-                            });
+            AnnotationSpec annotationSpec = AnnotationSpec.get(annotationMirror);
+            annotationSpec.members.get(VALUE_SCOPES).forEach(scope -> {
+                if(scope.toString().replace("\"", "").equals(this.scopeName)) {
+                    int scopePosition = annotationSpec.members.get(VALUE_SCOPES).indexOf(scope);
+                    CodeBlock codeBlock = annotationSpec.members.get(VALUE_VALUES).get(scopePosition);
+                    ClassName annotationClassName = getAnnotationClassName(codeBlock);
+                    AnnotationSpec subAnnotationSpec = AnnotationSpec.builder(annotationClassName).addMember("value", codeBlock).build();
+                    builder.addAnnotation(subAnnotationSpec);
                 }
             });
         });
+    }
+
+    private ClassName getAnnotationClassName(CodeBlock codeBlock) {
+        String rAnnotate = codeBlock.toString().replaceAll("@", "");
+        int pNameEnd = rAnnotate.indexOf('(');
+        String annotationPkg = rAnnotate.substring(0, pNameEnd);
+        String[] splits = annotationPkg.split("\\.");
+        StringBuilder packageName = new StringBuilder();
+        Arrays.stream(splits).limit(splits.length-1).forEach(split -> packageName.append(split).append("."));
+        return ClassName.get(packageName.toString().substring(0, packageName.toString().length()-1), splits[splits.length-1]);
     }
 
     private void addInitializeScopesMethod(TypeSpec.Builder builder) {
