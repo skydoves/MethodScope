@@ -140,7 +140,7 @@ public class ScopeClassGenerator {
     }
 
     private String getClazzPrefixName(String scopeName) {
-        return this.annotatedClazz.clazzName + SCOPE_PREFIX + scopeName;
+        return this.annotatedClazz.clazzName + SCOPE_PREFIX + "_" + scopeName;
     }
 
     private String getInitializeAnnotationName() {

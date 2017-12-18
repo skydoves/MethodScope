@@ -11,7 +11,7 @@ import com.airbnb.deeplinkdispatch.DeepLink;
 import com.skydoves.methodscope.MethodScope;
 import com.skydoves.methodscope.ScopeInitializer;
 
-@MethodScope(scopes = { "Test", "Power" })
+@MethodScope(scopes = { "Test", "Power", "RealForce" })
 @DeepLinkScopeAnnotation(
         scopes = { "Test", "Power" },
         values = { @DeepLink( value = "https://www.naver.com"), @DeepLink("https://google.com") })
