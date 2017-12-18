@@ -122,7 +122,7 @@ public class MethodScopeProcessor extends AbstractProcessor {
 
     private void checkValidScopeAnnotatedClass(TypeElement annotatedType) throws IllegalAccessException {
         if(!annotatedType.getKind().isClass()) {
-            throw new IllegalAccessException("Only classes can be annotated with @KickbackBox");
+            throw new IllegalAccessException("Only classes can be annotated with @MethodScope");
         } else if(annotatedType.getModifiers().contains(Modifier.FINAL)) {
             throw new IllegalAccessException("class modifier can not be final");
         } else if(annotatedType.getModifiers().contains(Modifier.PRIVATE)) {
