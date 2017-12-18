@@ -112,7 +112,7 @@ public class MethodScopeProcessor extends AbstractProcessor {
 
     private void generateProcessMethodScope(MethodScopeAnnotatedClass annotatedClazz, String packageName, String scope) {
         try {
-            ScopeClassGenerator scopeClassGenerator = new ScopeClassGenerator(annotatedClazz, packageName, scope, processingEnv.getElementUtils());
+            ScopeClassGenerator scopeClassGenerator = new ScopeClassGenerator(annotatedClazz, packageName, scope);
             TypeSpec scopeClazz = scopeClassGenerator.generate();
             JavaFile.builder(packageName, scopeClazz).build().writeTo(processingEnv.getFiler());
         } catch (IOException e) {

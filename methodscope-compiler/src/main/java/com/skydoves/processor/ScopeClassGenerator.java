@@ -29,14 +29,12 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.util.Elements;
 
 public class ScopeClassGenerator {
 
     private final MethodScopeAnnotatedClass annotatedClazz;
     private final String packageName;
     private final String scopeName;
-    private final Elements elementUtils;
 
     private static final String SCOPE_PREFIX = "Scope";
     private final String INITIALIZE_IMPL = "initializeScopes";
@@ -45,11 +43,10 @@ public class ScopeClassGenerator {
     private static final String VALUE_SCOPES = "scopes";
     private static final String VALUE_VALUES = "values";
 
-    public ScopeClassGenerator(MethodScopeAnnotatedClass annotatedClazz, String packageName, String scopeName, Elements elementUtils) {
+    public ScopeClassGenerator(MethodScopeAnnotatedClass annotatedClazz, String packageName, String scopeName) {
         this.annotatedClazz = annotatedClazz;
         this.packageName = packageName;
         this.scopeName = scopeName;
-        this.elementUtils = elementUtils;
     }
 
     public TypeSpec generate() {
