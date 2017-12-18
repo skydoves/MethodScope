@@ -16,26 +16,27 @@
 
 package com.skydoves.processor;
 
-import com.google.common.base.VerifyException;
 import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.util.Elements;
 
 public class ScopeClassGenerator {
 
     private final MethodScopeAnnotatedClass annotatedClazz;
     private final String packageName;
     private final String scopeName;
+    private final Elements elementUtils;
 
     private static final String SCOPE_PREFIX = "Scope";
     private final String INITIALIZE_IMPL = "initializeScopes";
@@ -44,10 +45,11 @@ public class ScopeClassGenerator {
     private static final String VALUE_SCOPES = "scopes";
     private static final String VALUE_VALUES = "values";
 
-    public ScopeClassGenerator(MethodScopeAnnotatedClass annotatedClazz, String packageName, String scopeName) {
+    public ScopeClassGenerator(MethodScopeAnnotatedClass annotatedClazz, String packageName, String scopeName, Elements elementUtils) {
         this.annotatedClazz = annotatedClazz;
         this.packageName = packageName;
         this.scopeName = scopeName;
+        this.elementUtils = elementUtils;
     }
 
     public TypeSpec generate() {
@@ -67,26 +69,21 @@ public class ScopeClassGenerator {
     private void addScopeAnnotations(TypeSpec.Builder builder) {
         this.annotatedClazz.scopeAnnotationList.forEach(annotationMirror -> {
             AnnotationSpec annotationSpec = AnnotationSpec.get(annotationMirror);
-            annotationSpec.members.get(VALUE_SCOPES).forEach(scope -> {
-                if(scope.toString().replace("\"", "").equals(this.scopeName)) {
-                    int scopePosition = annotationSpec.members.get(VALUE_SCOPES).indexOf(scope);
-                    CodeBlock codeBlock = annotationSpec.members.get(VALUE_VALUES).get(scopePosition);
-                    ClassName annotationClassName = getAnnotationClassName(codeBlock);
-                    AnnotationSpec subAnnotationSpec = AnnotationSpec.builder(annotationClassName).addMember("value", codeBlock).build();
-                    builder.addAnnotation(subAnnotationSpec);
-                }
+            annotationSpec.members.get(VALUE_SCOPES).stream()
+                    .filter(scope -> scope.toString().replace("\"", "").equals(this.scopeName))
+                    .forEach(scope -> {
+                        int scopePosition = annotationSpec.members.get(VALUE_SCOPES).indexOf(scope);
+                        for(Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> element : annotationMirror.getElementValues().entrySet()) {
+                            if (element.getKey().getSimpleName().toString().equals(VALUE_VALUES)) {
+                                List valueList = (List) element.getValue().getValue();
+                                AnnotationMirror scopeAnnotationMirror = (AnnotationMirror) valueList.get(scopePosition);
+                                AnnotationSpec scopeAnnotationSpec = AnnotationSpec.get(scopeAnnotationMirror);
+                                builder.addAnnotation(scopeAnnotationSpec);
+                                break;
+                            }
+                        }
             });
         });
-    }
-
-    private ClassName getAnnotationClassName(CodeBlock codeBlock) {
-        String rAnnotate = codeBlock.toString().replaceAll("@", "");
-        int pNameEnd = rAnnotate.indexOf('(');
-        String annotationPkg = rAnnotate.substring(0, pNameEnd);
-        String[] splits = annotationPkg.split("\\.");
-        StringBuilder packageName = new StringBuilder();
-        Arrays.stream(splits).limit(splits.length-1).forEach(split -> packageName.append(split).append("."));
-        return ClassName.get(packageName.toString().substring(0, packageName.toString().length()-1), splits[splits.length-1]);
     }
 
     private void addInitializeScopesMethod(TypeSpec.Builder builder) {
