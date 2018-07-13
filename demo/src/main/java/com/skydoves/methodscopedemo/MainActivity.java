@@ -23,7 +23,6 @@ public class MainActivity extends AppCompatActivity implements ScopeInitializer 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initializeScopes();
-
     }
 
     @Override

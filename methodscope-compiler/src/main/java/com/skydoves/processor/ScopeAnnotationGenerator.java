@@ -52,6 +52,7 @@ public class ScopeAnnotationGenerator {
                 .addAnnotation(Documented.class)
                 .addAnnotation(AnnotationSpec.builder(Target.class)
                         .addMember("value", "$T.METHOD", elementTypeClassName)
+                        .addMember("value", "$T.FIELD", elementTypeClassName)
                         .build())
                 .addAnnotation(AnnotationSpec.builder(Retention.class)
                         .addMember("value", "$T.CLASS", retentionPolicyClassName)

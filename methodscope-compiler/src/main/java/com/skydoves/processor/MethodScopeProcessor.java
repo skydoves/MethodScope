@@ -19,10 +19,12 @@ package com.skydoves.processor;
 import com.google.auto.service.AutoService;
 import com.google.common.base.VerifyException;
 import com.skydoves.methodscope.MethodScope;
+import com.skydoves.methodscope.ScopeAnnotation;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -30,7 +32,6 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -41,9 +42,6 @@ import javax.lang.model.element.TypeElement;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes({
-        "com.skydoves.methodscope.MethodScope",
-        "com.skydoves.methodscope.ScopeAnnotation"})
 @AutoService(Processor.class)
 public class MethodScopeProcessor extends AbstractProcessor {
 
@@ -53,6 +51,14 @@ public class MethodScopeProcessor extends AbstractProcessor {
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         this.messager = processingEnv.getMessager();
+    }
+
+    @Override
+    public Set<String> getSupportedAnnotationTypes() {
+        HashSet<String> typeSets = new HashSet<>();
+        typeSets.add(MethodScope.class.getCanonicalName());
+        typeSets.add(ScopeAnnotation.class.getCanonicalName());
+        return typeSets;
     }
 
     @Override
