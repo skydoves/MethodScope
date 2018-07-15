@@ -23,6 +23,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +60,7 @@ public class ScopeClassGenerator {
 
         addScopeAnnotations(builder);
         addInitializeScopesMethod(builder);
+        addPublicFields(builder);
         addScopeFields(builder);
 
         builder.addMethods(getScopedMethodScopes());
@@ -90,14 +92,43 @@ public class ScopeClassGenerator {
         this.annotatedClazz.annotatedElement.getEnclosedElements().stream()
                 .filter(element -> element instanceof VariableElement)
                 .map(element -> (VariableElement)element)
-                .filter(variableElement -> variableElement.getModifiers().contains(Modifier.PRIVATE))
                 .forEach(variable ->
                     variable.getAnnotationMirrors().stream()
                             .filter(annotationMirror -> annotationMirror.toString().equals(getAnnotationName()))
                             .forEach(annotatedVariable -> {
                                 TypeName typeName = TypeName.get(variable.asType());
-                                builder.addField(FieldSpec.builder(typeName, variable.getSimpleName().toString(), Modifier.PRIVATE).build());
+                                FieldSpec.Builder fieldSpecBuilder = FieldSpec.builder(typeName, variable.getSimpleName().toString(), getVariableModifier(variable));
+
+                                variable.getAnnotationMirrors().stream()
+                                        .filter(annotationMirror -> !annotationMirror.toString().equals(getAnnotationName()))
+                                        .forEach(annotationMirror -> fieldSpecBuilder.addAnnotation(AnnotationSpec.get(annotationMirror)));
+
+                                builder.addField(fieldSpecBuilder.build());
                             }));
+    }
+
+    private void addPublicFields(TypeSpec.Builder builder) {
+        this.annotatedClazz.annotatedElement.getEnclosedElements().stream()
+                .filter(element -> element instanceof VariableElement)
+                .map(element -> (VariableElement)element)
+                .forEach(variable -> {
+                    boolean isContained = false;
+                    for (AnnotationMirror annotationMirror : variable.getAnnotationMirrors()) {
+                        if(annotationMirror.toString().contains(SCOPE_PREFIX))
+                            isContained = true;
+                    }
+
+                    if(!isContained) {
+                        TypeName typeName = TypeName.get(variable.asType());
+                        FieldSpec.Builder fieldSpecBuilder = FieldSpec.builder(typeName, variable.getSimpleName().toString(), getVariableModifier(variable));
+
+                        variable.getAnnotationMirrors().stream()
+                                .filter(annotationMirror -> !annotationMirror.toString().equals(getAnnotationName()))
+                                .forEach(annotationMirror -> fieldSpecBuilder.addAnnotation(AnnotationSpec.get(annotationMirror)));
+
+                        builder.addField(fieldSpecBuilder.build());
+                    }
+                });
     }
 
     private void addInitializeScopesMethod(TypeSpec.Builder builder) {
@@ -154,6 +185,16 @@ public class ScopeClassGenerator {
                 );
 
         return methodSpecList;
+    }
+
+    private Modifier[] getVariableModifier(VariableElement variableElement) {
+        List<Modifier> modifiers = new ArrayList<>();
+
+        Iterator iterator = variableElement.getModifiers().iterator();
+        while (iterator.hasNext()) {
+            modifiers.add((Modifier) iterator.next());
+        }
+        return modifiers.toArray(new Modifier[modifiers.size()]);
     }
 
     private String getClazzPrefixName(String scopeName) {
