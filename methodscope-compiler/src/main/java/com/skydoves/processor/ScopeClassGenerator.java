@@ -17,6 +17,7 @@
 package com.skydoves.processor;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -29,6 +30,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.VariableElement;
 
 public class ScopeClassGenerator {
 
@@ -57,6 +59,7 @@ public class ScopeClassGenerator {
 
         addScopeAnnotations(builder);
         addInitializeScopesMethod(builder);
+        addScopeFields(builder);
 
         builder.addMethods(getScopedMethodScopes());
 
@@ -81,6 +84,20 @@ public class ScopeClassGenerator {
                         }
             });
         });
+    }
+
+    private void addScopeFields(TypeSpec.Builder builder) {
+        this.annotatedClazz.annotatedElement.getEnclosedElements().stream()
+                .filter(element -> element instanceof VariableElement)
+                .map(element -> (VariableElement)element)
+                .filter(variableElement -> variableElement.getModifiers().contains(Modifier.PRIVATE))
+                .forEach(variable ->
+                    variable.getAnnotationMirrors().stream()
+                            .filter(annotationMirror -> annotationMirror.toString().equals(getAnnotationName()))
+                            .forEach(annotatedVariable -> {
+                                TypeName typeName = TypeName.get(variable.asType());
+                                builder.addField(FieldSpec.builder(typeName, variable.getSimpleName().toString(), Modifier.PRIVATE).build());
+                            }));
     }
 
     private void addInitializeScopesMethod(TypeSpec.Builder builder) {
@@ -110,11 +127,11 @@ public class ScopeClassGenerator {
         annotatedClazz.annotatedElement.getEnclosedElements().stream()
                 .filter(element -> element instanceof ExecutableElement)
                 .map(element -> (ExecutableElement) element)
-                .forEach(method -> {
+                .forEach(method ->
                     method.getAnnotationMirrors().stream()
                             .filter(annotationMirror -> annotationMirror.toString().equals(getInitializeAnnotationName()))
-                            .forEach(annotation -> builder.addStatement("$N()", method.getSimpleName().toString()));
-                });
+                            .forEach(annotation -> builder.addStatement("$N()", method.getSimpleName().toString()))
+                );
 
         return builder.build();
     }
@@ -125,7 +142,7 @@ public class ScopeClassGenerator {
         annotatedClazz.annotatedElement.getEnclosedElements().stream()
                 .filter(element -> element instanceof ExecutableElement)
                 .map(element -> (ExecutableElement) element)
-                .forEach(method -> {
+                .forEach(method ->
                     method.getAnnotationMirrors().stream()
                             .filter(annotationMirror -> annotationMirror.toString().equals(getScopeAnnotationName()))
                             .forEach(annotation -> {
@@ -133,8 +150,8 @@ public class ScopeClassGenerator {
                                         .addStatement("super.$N()", method.getSimpleName())
                                         .build();
                                 methodSpecList.add(overrideSpec);
-                            });
-                });
+                            })
+                );
 
         return methodSpecList;
     }
@@ -148,6 +165,10 @@ public class ScopeClassGenerator {
     }
 
     private String getScopeAnnotationName() {
+        return "@" + scopeName + SCOPE_PREFIX;
+    }
+
+    private String getAnnotationName() {
         return "@" + scopeName + SCOPE_PREFIX;
     }
 }

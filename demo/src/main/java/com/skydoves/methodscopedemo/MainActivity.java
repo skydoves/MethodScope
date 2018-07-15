@@ -17,7 +17,7 @@ import com.skydoves.methodscope.ScopeInitializer;
         values = { @DeepLink( value = "https://www.naver.com"), @DeepLink("https://google.com") })
 public class MainActivity extends AppCompatActivity implements ScopeInitializer {
 
-    private String text = "hello, methodScope";
+    @TestScope private String text = "hello, methodScope";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements ScopeInitializer 
     @Override
     public void initializeScopes() {
         Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+
     }
 
     @InitTestScope
