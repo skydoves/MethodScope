@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 skydoves
+ * Copyright (C) 2019 skydoves
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,5 +25,4 @@ import java.lang.annotation.Target;
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-public @interface ScopeAnnotation {
-}
+public @interface ScopeAnnotation {}

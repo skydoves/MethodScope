@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 skydoves
+ * Copyright (C) 2019 skydoves
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package com.skydoves.processor;
 import com.google.common.base.CaseFormat;
 
 public class StringUtils {
-    public static String toUpperCamel(String name) {
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name);
-    }
+  public static String toUpperCamel(String name) {
+    return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name);
+  }
 
-    public static String getErrorMessagePrefix() {
-        return "\n==================== <COMPILE ERROR LOG> ====================\n";
-    }
+  public static String getErrorMessagePrefix() {
+    return "\n==================== <COMPILE ERROR LOG> ====================\n";
+  }
 }
