@@ -9,7 +9,7 @@ import com.skydoves.methodscopedemo.scopes.TestScope
 
 @MyScope
 @TestScope(deeplink = DeepLink("https://www.naver.com"))
-open class MainActivity : AppCompatActivity() {
+abstract class MainActivity : AppCompatActivity() {
 
     var hello = ""
 

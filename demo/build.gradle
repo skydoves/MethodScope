@@ -22,11 +22,15 @@ android {
     kapt {
         correctErrorTypes = true
     }
+    lintOptions {
+        disable 'GoogleAppIndexingWarning'
+        baseline file("lint-baseline.xml")
+    }
 }
 
 dependencies {
-    implementation "androidx.appcompat:appcompat:1.1.0-alpha01"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "androidx.appcompat:appcompat:$accompatVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
     // method scope
     implementation project(":methodscope")
@@ -39,3 +43,5 @@ dependencies {
 repositories {
     mavenCentral()
 }
+
+apply from: '../spotless.gradle'
