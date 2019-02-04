@@ -43,13 +43,11 @@ public class MethodScopeAnnotatedClass {
         this.scopeAnnotationList = new ArrayList<>();
 
         annotatedElement.getAnnotationMirrors()
-              .forEach(annotation -> {
-                  scopeAnnotationList.add(annotation);
+              .forEach(annotation ->
                   annotation.getAnnotationType().asElement().getAnnotationMirrors()
                         .stream()
                         .filter(annotationMirror -> annotationMirror.getAnnotationType().asElement().getSimpleName().toString().equals(MethodScope.class.getSimpleName()))
                         .forEach(annotationMirror ->
-                            scopeAnnotationList.add(annotation));
-              });
+                            scopeAnnotationList.add(annotation)));
     }
 }

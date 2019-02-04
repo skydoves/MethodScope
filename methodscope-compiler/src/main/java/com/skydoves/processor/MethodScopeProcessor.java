@@ -34,6 +34,7 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
@@ -104,41 +105,19 @@ public class MethodScopeProcessor extends AbstractProcessor {
     private void processMethodScope(TypeElement annotatedType) {
         try {
             MethodScopeAnnotatedClass annotatedClazz = new MethodScopeAnnotatedClass(annotatedType, processingEnv.getElementUtils());
-//            annotatedClazz.scopeList.forEach(scope -> {
-//                PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(annotatedClazz.annotatedElement);
-//                String packageName = packageElement.isUnnamed() ? null : packageElement.getQualifiedName().toString();
-//                generateProcessInitializeScopeAnnotation(annotatedClazz, packageName, scope);
-//                generateProcessScopeAnnotation(annotatedClazz, packageName, scope);
-//                generateProcessMethodScope(annotatedClazz, packageName, scope);
-//            });
+            annotatedClazz.scopeAnnotationList.forEach(scopeAnnotation -> {
+                PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(annotatedClazz.annotatedElement);
+                String packageName = packageElement.isUnnamed() ? null : packageElement.getQualifiedName().toString();
+                generateProcessMethodScope(packageName, annotatedClazz, scopeAnnotation);
+            });
         } catch (VerifyException e) {
             handleExceptions(e.getMessage(), annotatedType);
         }
     }
 
-    private void generateProcessInitializeScopeAnnotation(MethodScopeAnnotatedClass annotatedClazz, String packageName, String scope) {
+    private void generateProcessMethodScope(String packageName, MethodScopeAnnotatedClass annotatedClazz, AnnotationMirror scopeAnnotation) {
         try {
-            InitializeScopeAnnotationGenerator annotationsGenerator = new InitializeScopeAnnotationGenerator(annotatedClazz, packageName, scope);
-            TypeSpec scopeAnnotation = annotationsGenerator.generate();
-            JavaFile.builder(packageName, scopeAnnotation).build().writeTo(processingEnv.getFiler());
-        } catch (IOException e) {
-            // ignore ;)
-        }
-    }
-
-    private void generateProcessScopeAnnotation(MethodScopeAnnotatedClass annotatedClazz, String packageName, String scope) {
-        try {
-            ScopeAnnotationGenerator annotationsGenerator = new ScopeAnnotationGenerator(annotatedClazz, packageName, scope);
-            TypeSpec scopeAnnotation = annotationsGenerator.generate();
-            JavaFile.builder(packageName, scopeAnnotation).build().writeTo(processingEnv.getFiler());
-        } catch (IOException e) {
-            // ignore :)
-        }
-    }
-
-    private void generateProcessMethodScope(MethodScopeAnnotatedClass annotatedClazz, String packageName, String scope) {
-        try {
-            ScopeClassGenerator scopeClassGenerator = new ScopeClassGenerator(annotatedClazz, packageName, scope);
+            ScopeClassGenerator scopeClassGenerator = new ScopeClassGenerator(packageName, annotatedClazz, scopeAnnotation);
             TypeSpec scopeClazz = scopeClassGenerator.generate();
             JavaFile.builder(packageName, scopeClazz).build().writeTo(processingEnv.getFiler());
         } catch (IOException e) {
