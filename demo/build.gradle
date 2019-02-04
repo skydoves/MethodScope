@@ -1,4 +1,7 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 28
@@ -16,16 +19,23 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    kapt {
+        correctErrorTypes = true
+    }
 }
 
 dependencies {
     implementation "androidx.appcompat:appcompat:1.1.0-alpha01"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     // method scope
     implementation project(":methodscope")
-    annotationProcessor project(":methodscope-compiler")
+    kapt project(":methodscope-compiler")
 
     // DeepLink
     implementation "com.airbnb:deeplinkdispatch:3.1.1"
-    annotationProcessor "com.airbnb:deeplinkdispatch-processor:3.1.1"
+}
+
+repositories {
+    mavenCentral()
 }
