@@ -21,15 +21,13 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.VariableElement;
 
-@SuppressWarnings("ALL")
+@SuppressWarnings({"FieldCanBeLocal", "WeakerAccess"})
 public class ScopeClassGenerator {
 
     private final MethodScopeAnnotatedClass annotatedClazz;
@@ -37,14 +35,7 @@ public class ScopeClassGenerator {
     private final AnnotationMirror scopeAnnotation;
     private final String scopeName;
 
-    private static final String SCOPE_PREFIX = "Scope";
-    private final String INITIALIZE_IMPL = "initializeScopes";
-    private static final String SCOPE_INITIALIZE = "Init";
-
-    private static final String VALUE_SCOPES = "scopes";
-    private static final String VALUE_VALUES = "values";
-
-    public ScopeClassGenerator(String packageName, MethodScopeAnnotatedClass annotatedClazz, AnnotationMirror scopeAnnotation) {
+    public ScopeClassGenerator(String packageName, MethodScopeAnnotatedClass annotatedClazz, AnnotationMirror scopeAnnotation) throws IllegalArgumentException  {
         this.packageName = packageName;
         this.annotatedClazz = annotatedClazz;
         this.scopeAnnotation = scopeAnnotation;
@@ -61,47 +52,36 @@ public class ScopeClassGenerator {
         return builder.build();
     }
 
-    private List<MethodSpec> getScopedMethodScopes() {
+    private List<MethodSpec> getScopedMethodScopes() throws IllegalArgumentException {
         List<MethodSpec> methodSpecList = new ArrayList<>();
 
-        //TODO should be fixed the second filter
         annotatedClazz.annotatedElement.getEnclosedElements().stream()
                 .filter(element -> element instanceof ExecutableElement)
                 .map(element -> (ExecutableElement) element)
-                .forEach(method -> {
+                .forEach(method ->
                     annotatedClazz.annotatedElement.getEnclosedElements().stream()
                           .filter(element -> element instanceof ExecutableElement)
+                          .filter(element -> element.getSimpleName().toString().equals(getScopeMethodName(method)))
                           .map(element -> (ExecutableElement) element)
-                          .filter(element -> element.getSimpleName().toString().equals(getScopeMethodname(element)))
                           .forEach(scopeMethod -> {
                               MethodSpec methodSpec = MethodSpec
-                                    .methodBuilder(method.getSimpleName().toString())
-                                    .addAnnotation(Override.class)
-                                    .addStatement("super.$N()", scopeMethod.getSimpleName().toString())
-                                    .build();
-                              methodSpecList.add(methodSpec);
-                          });
-                });
+                                        .methodBuilder(method.getSimpleName().toString())
+                                        .addAnnotation(Override.class)
+                                        .addModifiers(Modifier.PUBLIC)
+                                        .addStatement("super.$N()", scopeMethod.getSimpleName().toString())
+                                        .build();
+                                  methodSpecList.add(methodSpec);
+                          }));
 
         return methodSpecList;
-    }
-
-    private Modifier[] getVariableModifier(VariableElement variableElement) {
-        List<Modifier> modifiers = new ArrayList<>();
-
-        Iterator iterator = variableElement.getModifiers().iterator();
-        while (iterator.hasNext()) {
-            modifiers.add((Modifier) iterator.next());
-        }
-        return modifiers.toArray(new Modifier[modifiers.size()]);
     }
 
     private String getScopeClassName() {
         return this.annotatedClazz.clazzName + "_" + getScopeName();
     }
 
-    private String getScopeMethodname(ExecutableElement method) {
-        return getScopeName() + "_" + method.getSimpleName().toString();
+    private String getScopeMethodName(ExecutableElement method) {
+        return method.getSimpleName().toString() + "_" + getScopeName();
     }
 
     private String getScopeName() {
