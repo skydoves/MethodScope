@@ -24,6 +24,6 @@ public class StringUtils {
     }
 
     public static String getErrorMessagePrefix() {
-        return "==================== ERROR LOG ====================\n";
+        return "\n==================== <COMPILE ERROR LOG> ====================\n";
     }
 }

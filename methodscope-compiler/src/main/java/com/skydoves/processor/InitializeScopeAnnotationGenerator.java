@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
 
 import javax.lang.model.element.Modifier;
 
+@SuppressWarnings("WeakerAccess")
 public class InitializeScopeAnnotationGenerator {
 
     private final MethodScopeAnnotatedClass annotatedClazz;

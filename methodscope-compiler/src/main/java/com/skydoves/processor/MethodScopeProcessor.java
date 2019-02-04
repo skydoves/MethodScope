@@ -19,11 +19,11 @@ package com.skydoves.processor;
 import com.google.auto.service.AutoService;
 import com.google.common.base.VerifyException;
 import com.skydoves.methodscope.MethodScope;
-import com.skydoves.methodscope.ScopeAnnotation;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,24 +41,25 @@ import javax.lang.model.element.TypeElement;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+@SuppressWarnings("unused")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
 public class MethodScopeProcessor extends AbstractProcessor {
 
+    private HashSet<TypeElement> candidates = new HashSet<>();
     private Messager messager;
 
-    @Override
-    public synchronized void init(ProcessingEnvironment processingEnv) {
+    @Override public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         this.messager = processingEnv.getMessager();
     }
 
-    @Override
-    public Set<String> getSupportedAnnotationTypes() {
-        HashSet<String> typeSets = new HashSet<>();
-        typeSets.add(MethodScope.class.getCanonicalName());
-        typeSets.add(ScopeAnnotation.class.getCanonicalName());
-        return typeSets;
+    @Override public Set<String> getSupportedAnnotationTypes() {
+        return Collections.singleton(MethodScope.class.getCanonicalName());
+    }
+
+    @Override public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latest();
     }
 
     @Override
@@ -67,16 +68,35 @@ public class MethodScopeProcessor extends AbstractProcessor {
             return true;
         }
 
+        HashSet<TypeElement> methodScopedAnnotations = new HashSet<>();
         roundEnv.getElementsAnnotatedWith(MethodScope.class).stream()
                 .map(annotatedType -> (TypeElement) annotatedType)
                 .forEach(annotatedType -> {
                     try {
-                        checkValidScopeAnnotatedClass(annotatedType);
-                        processMethodScope(annotatedType);
-                    } catch (IllegalAccessException e) {
-                        showErrorLog(e.getMessage(), annotatedType);
+                        checkValidScopeAnnotations(annotatedType, methodScopedAnnotations);
+                    } catch (IllegalArgumentException e) {
+                        handleExceptions(e.getMessage(), annotatedType);
                     }
                 });
+
+        methodScopedAnnotations.forEach(element ->
+            roundEnv.getElementsAnnotatedWith(element).stream()
+                  .map(annotatedType -> (TypeElement) annotatedType)
+                  .forEach(annotatedType -> {
+                      try {
+                          checkValidScopeAnnotatedClasses(annotatedType, candidates);
+                      } catch (IllegalArgumentException e) {
+                          handleExceptions(e.getMessage(), annotatedType);
+                      }
+                  }));
+
+        candidates.forEach(candidate -> {
+            try {
+                processMethodScope(candidate);
+            } catch (IllegalArgumentException e) {
+                handleExceptions(e.getMessage(), candidate);
+            }
+        });
 
         return true;
     }
@@ -84,19 +104,19 @@ public class MethodScopeProcessor extends AbstractProcessor {
     private void processMethodScope(TypeElement annotatedType) {
         try {
             MethodScopeAnnotatedClass annotatedClazz = new MethodScopeAnnotatedClass(annotatedType, processingEnv.getElementUtils());
-            annotatedClazz.scopeList.forEach(scope -> {
-                PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(annotatedClazz.annotatedElement);
-                String packageName = packageElement.isUnnamed() ? null : packageElement.getQualifiedName().toString();
-                generateProcessInitializeScopeAnnotation(annotatedClazz, packageName, scope);
-                generateProcessScopeAnnotation(annotatedClazz, packageName, scope);
-                generateProcessMethodScope(annotatedClazz, packageName, scope);
-            });
+//            annotatedClazz.scopeList.forEach(scope -> {
+//                PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(annotatedClazz.annotatedElement);
+//                String packageName = packageElement.isUnnamed() ? null : packageElement.getQualifiedName().toString();
+//                generateProcessInitializeScopeAnnotation(annotatedClazz, packageName, scope);
+//                generateProcessScopeAnnotation(annotatedClazz, packageName, scope);
+//                generateProcessMethodScope(annotatedClazz, packageName, scope);
+//            });
         } catch (VerifyException e) {
-            showErrorLog(e.getMessage(), annotatedType);
+            handleExceptions(e.getMessage(), annotatedType);
         }
     }
 
-    protected void generateProcessInitializeScopeAnnotation(MethodScopeAnnotatedClass annotatedClazz, String packageName, String scope) {
+    private void generateProcessInitializeScopeAnnotation(MethodScopeAnnotatedClass annotatedClazz, String packageName, String scope) {
         try {
             InitializeScopeAnnotationGenerator annotationsGenerator = new InitializeScopeAnnotationGenerator(annotatedClazz, packageName, scope);
             TypeSpec scopeAnnotation = annotationsGenerator.generate();
@@ -126,19 +146,33 @@ public class MethodScopeProcessor extends AbstractProcessor {
         }
     }
 
-    private void checkValidScopeAnnotatedClass(TypeElement annotatedType) throws IllegalAccessException {
-        if(!annotatedType.getKind().isClass()) {
-            throw new IllegalAccessException("Only classes can be annotated with @MethodScope");
+    private void checkValidScopeAnnotations(TypeElement annotatedType, HashSet<TypeElement> methodScopedAnnotations)
+          throws IllegalArgumentException {
+        if(!annotatedType.getKind().isInterface()) {
+            throw new IllegalArgumentException("Only interfaces can be annotated with @MethodScope");
         } else if(annotatedType.getModifiers().contains(Modifier.FINAL)) {
-            throw new IllegalAccessException("class modifier can not be final");
+            throw new IllegalArgumentException("class modifier can not be final");
         } else if(annotatedType.getModifiers().contains(Modifier.PRIVATE)) {
-            throw new IllegalAccessException("class modifier can not be private");
-        } else if(annotatedType.getModifiers().contains(Modifier.ABSTRACT)) {
-            throw new IllegalAccessException("class modifier can not be abstract");
+            throw new IllegalArgumentException("class modifier can not be private");
+        } else {
+            methodScopedAnnotations.add(annotatedType);
         }
     }
 
-    private void showErrorLog(String message, Element element) {
+    private void checkValidScopeAnnotatedClasses(TypeElement annotatedType, HashSet<TypeElement> candidates)
+          throws IllegalArgumentException {
+        if(!annotatedType.getKind().isClass()) {
+            throw new IllegalArgumentException("Only classes can be annotated with scope annotation.");
+        } else if(annotatedType.getModifiers().contains(Modifier.FINAL)) {
+            throw new IllegalArgumentException("class modifier can not be final");
+        } else if(annotatedType.getModifiers().contains(Modifier.PRIVATE)) {
+            throw new IllegalArgumentException("class modifier can not be private");
+        } else {
+            candidates.add(annotatedType);
+        }
+    }
+
+    private void handleExceptions(String message, Element element) {
         messager.printMessage(ERROR, StringUtils.getErrorMessagePrefix() + message, element);
     }
 }

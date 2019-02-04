@@ -18,71 +18,38 @@ package com.skydoves.processor;
 
 import com.google.common.base.VerifyException;
 import com.skydoves.methodscope.MethodScope;
-import com.skydoves.methodscope.ScopeAnnotation;
-import com.skydoves.methodscope.ScopeInitializer;
-import com.squareup.javapoet.TypeName;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 
+@SuppressWarnings("WeakerAccess")
 public class MethodScopeAnnotatedClass {
 
     public final TypeElement annotatedElement;
     public final String packageName;
     public final String clazzName;
-    public final List<String> scopeList;
     public final List<AnnotationMirror> scopeAnnotationList;
-    private boolean checkScopeInitializer = false;
-
-    private static final String VALUE_SCOPES = "scopes";
-    private static final String VALUE_VALUES = "values";
 
     public MethodScopeAnnotatedClass(TypeElement annotatedElement, Elements elementUtils) throws VerifyException {
-        MethodScope methodScope = annotatedElement.getAnnotation(MethodScope.class);
         PackageElement packageElement = elementUtils.getPackageOf(annotatedElement);
         this.packageName = packageElement.isUnnamed() ? null : packageElement.getQualifiedName().toString();
         this.annotatedElement = annotatedElement;
         this.clazzName = annotatedElement.getSimpleName().toString();
-        this.scopeList = new ArrayList<>();
         this.scopeAnnotationList = new ArrayList<>();
 
-        Arrays.stream(methodScope.scopes()).forEach(scope -> {
-            if(!scopeList.contains(scope)) {
-                scopeList.add(StringUtils.toUpperCamel(scope));
-            } else
-                throw new VerifyException(String.format("scope %s is already exist.", scope));
-        });
-
-        this.annotatedElement.getInterfaces().stream()
-                .filter(impl -> TypeName.get(impl).equals(TypeName.get(ScopeInitializer.class)))
-                .forEach(impl -> checkScopeInitializer = true);
-
-        checkScopeInitializerImplemented();
-
-        annotatedElement.getAnnotationMirrors().forEach(annotationMirror -> {
-            Element element = annotationMirror.getAnnotationType().asElement();
-            element.getAnnotationMirrors().forEach(annotation -> {
-                if(annotation.toString().equals("@" + ScopeAnnotation.class.getName())) {
-                    annotationMirror.getElementValues().forEach((method, value) -> {
-                        if(!(method.getSimpleName().toString().equals(VALUE_SCOPES) || method.getSimpleName().toString().equals(VALUE_VALUES)))
-                            throw new VerifyException("ScopeAnnotation must has only String[] scopes() and @Annotation[] values() methods.");
-                    });
-                    this.scopeAnnotationList.add(annotationMirror);
-                }
-            });
-        });
-    }
-
-    private void checkScopeInitializerImplemented() {
-        if(!checkScopeInitializer) {
-            throw new VerifyException("MethodScope class must implements ScopeInitializer interface.");
-        }
+        annotatedElement.getAnnotationMirrors()
+              .forEach(annotation -> {
+                  scopeAnnotationList.add(annotation);
+                  annotation.getAnnotationType().asElement().getAnnotationMirrors()
+                        .stream()
+                        .filter(annotationMirror -> annotationMirror.getAnnotationType().asElement().getSimpleName().toString().equals(MethodScope.class.getSimpleName()))
+                        .forEach(annotationMirror ->
+                            scopeAnnotationList.add(annotation));
+              });
     }
 }
