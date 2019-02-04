@@ -8,7 +8,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -19,6 +19,9 @@ android {
 }
 
 dependencies {
+    implementation "androidx.appcompat:appcompat:1.1.0-alpha01"
+
+    // method scope
     implementation project(":methodscope")
     annotationProcessor project(":methodscope-compiler")
 
