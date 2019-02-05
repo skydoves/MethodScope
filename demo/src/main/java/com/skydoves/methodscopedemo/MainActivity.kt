@@ -31,10 +31,11 @@ abstract class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
         initialize()
     }
 
-    open fun initialize() {
+    fun initialize() {
         hello = "This is "
     }
 
@@ -46,6 +47,15 @@ abstract class MainActivity : AppCompatActivity() {
     fun initializeMyScope() {
         hello += "MyScope"
         Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
+    }
+
+    abstract fun test()
+
+    fun testTestScope() {
+        Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
+    }
+
+    fun testMyScope() {
     }
 
     companion object {
