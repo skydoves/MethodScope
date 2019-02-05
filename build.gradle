@@ -18,17 +18,6 @@ buildscript {
         classpath "com.diffplug.spotless:spotless-plugin-gradle:$spotlessGradle"
         classpath "com.novoda:bintray-release:$bintrayGradle"
     }
-
-    ext {
-        metadata = [userOrg : 'devmagician',
-                    groupId : 'com.github.skydoves',
-                    publishVersion : '1.0.0.3',
-                    desc : 'This is MethodScope by skydoves',
-                    website : 'https://github.com/skydoves/MethodScope',
-                    issueTracker : '${website}/issues',
-                    repository : 'https://github.com/skydoves/MethodScope.git',
-                    licences : ['Apache-2.0']]
-    }
 }
 
 allprojects {
