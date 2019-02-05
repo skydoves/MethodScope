@@ -101,6 +101,10 @@ public class ScopeClassGenerator {
                     .map(element -> (ExecutableElement) element)
                     .filter(
                         element ->
+                            !element.getModifiers().contains(Modifier.ABSTRACT)
+                                && element.getModifiers().contains(Modifier.PUBLIC))
+                    .filter(
+                        element ->
                             element.getSimpleName().toString().equals(getScopeMethodName(method))
                                 || (hasScopedAnnotation(element)
                                     & element
@@ -172,6 +176,10 @@ public class ScopeClassGenerator {
                   .stream()
                   .filter(element -> element instanceof ExecutableElement)
                   .map(element -> (ExecutableElement) element)
+                  .filter(
+                      element ->
+                          !element.getModifiers().contains(Modifier.ABSTRACT)
+                              && element.getModifiers().contains(Modifier.PUBLIC))
                   .filter(
                       element ->
                           element.getSimpleName().toString().equals(getScopeMethodName(method))
