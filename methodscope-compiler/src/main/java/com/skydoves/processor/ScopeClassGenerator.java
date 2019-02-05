@@ -24,6 +24,7 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.List;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 
@@ -98,7 +99,13 @@ public class ScopeClassGenerator {
                     .filter(element -> element instanceof ExecutableElement)
                     .filter(
                         element ->
-                            element.getSimpleName().toString().equals(getScopeMethodName(method)))
+                            element.getSimpleName().toString().equals(getScopeMethodName(method))
+                                || (hasScopedAnnotation(element)
+                                    & element
+                                        .getSimpleName()
+                                        .toString()
+                                        .startsWith(method.getSimpleName().toString())))
+                    .filter(element -> !method.getSimpleName().toString().contains("<init>"))
                     .map(element -> (ExecutableElement) element)
                     .forEach(
                         scopeMethod -> {
@@ -135,7 +142,13 @@ public class ScopeClassGenerator {
                   .filter(element -> element instanceof ExecutableElement)
                   .filter(
                       element ->
-                          element.getSimpleName().toString().equals(getScopeMethodName(method)))
+                          element.getSimpleName().toString().equals(getScopeMethodName(method))
+                              || (hasScopedAnnotation(element)
+                                  & element
+                                      .getSimpleName()
+                                      .toString()
+                                      .startsWith(method.getSimpleName().toString())))
+                  .filter(element -> !method.getSimpleName().toString().contains("<init>"))
                   .map(element -> (ExecutableElement) element)
                   .forEach(
                       scopeMethod -> {
@@ -158,6 +171,16 @@ public class ScopeClassGenerator {
             });
 
     return methodSpecList;
+  }
+
+  private boolean hasScopedAnnotation(Element element) {
+    return element
+        .getAnnotationMirrors()
+        .stream()
+        .anyMatch(
+            annotation ->
+                annotation.toString().contains("@com.skydoves.methodscope.Scoped(")
+                    && annotation.toString().contains(getScopeName()));
   }
 
   private String getScopeClassName() {

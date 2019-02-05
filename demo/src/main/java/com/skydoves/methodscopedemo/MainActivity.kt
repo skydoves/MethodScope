@@ -20,6 +20,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.deeplinkdispatch.DeepLink
+import com.skydoves.methodscope.Scoped
 import com.skydoves.methodscopedemo.scopes.MyScope
 import com.skydoves.methodscopedemo.scopes.TestScope
 
@@ -35,11 +36,12 @@ abstract class MainActivity : AppCompatActivity() {
         initialize()
     }
 
-    fun initialize() {
+    open fun initialize() {
         hello = "This is "
     }
 
-    fun initializeTestScope() {
+    @Scoped(TestScope::class)
+    fun initializeTestScope333() {
         hello += "TestScope"
         Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
     }
@@ -51,7 +53,8 @@ abstract class MainActivity : AppCompatActivity() {
 
     abstract fun test()
 
-    fun testTestScope() {
+    @Scoped(TestScope::class)
+    fun testTestScopeqwdqwd() {
         Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
     }
 
