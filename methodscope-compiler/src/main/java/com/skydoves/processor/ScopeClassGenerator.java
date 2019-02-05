@@ -76,7 +76,7 @@ public class ScopeClassGenerator {
     return annotationSpecs;
   }
 
-  private List<MethodSpec> getScopedMethodScopes() {
+  private List<MethodSpec> getScopedMethodScopes() throws VerifyException {
     List<MethodSpec> methodSpecList = new ArrayList<>();
     annotatedClazz
         .annotatedElement
