@@ -36,19 +36,22 @@ abstract class MainActivity : AppCompatActivity() {
         initialize()
     }
 
-    open fun initialize() {
+    open fun initialize(): String {
         hello = "This is "
+        return hello
     }
 
     @Scoped(TestScope::class)
-    fun initializeTestScope333() {
+    fun initializeTestScope333(): String {
         hello += "TestScope"
         Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
+        return hello
     }
 
-    fun initializeMyScope() {
+    fun initializeMyScope(): String {
         hello += "MyScope"
         Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
+        return hello
     }
 
     abstract fun test()

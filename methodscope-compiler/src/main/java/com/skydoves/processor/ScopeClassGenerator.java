@@ -21,8 +21,10 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -97,6 +99,7 @@ public class ScopeClassGenerator {
                     .getEnclosedElements()
                     .stream()
                     .filter(element -> element instanceof ExecutableElement)
+                    .map(element -> (ExecutableElement) element)
                     .filter(
                         element ->
                             element.getSimpleName().toString().equals(getScopeMethodName(method))
@@ -105,19 +108,25 @@ public class ScopeClassGenerator {
                                         .getSimpleName()
                                         .toString()
                                         .startsWith(method.getSimpleName().toString())))
-                    .filter(element -> !method.getSimpleName().toString().contains("<init>"))
-                    .map(element -> (ExecutableElement) element)
+                    .filter(element -> !method.getSimpleName().toString().contains("<init>") &&
+                        method.getReturnType().equals((element).getReturnType()))
                     .forEach(
                         scopeMethod -> {
-                          MethodSpec methodSpec =
+                          MethodSpec.Builder builder =
                               MethodSpec.methodBuilder(method.getSimpleName().toString())
                                   .addAnnotation(Override.class)
                                   .addModifiers(Modifier.PUBLIC)
-                                  .addStatement("super.$N()", method.getSimpleName().toString())
-                                  .addStatement(
-                                      "super.$N()", scopeMethod.getSimpleName().toString())
-                                  .build();
-                          methodSpecList.add(methodSpec);
+                                  .returns(TypeName.get(method.getReturnType()));
+                                  if (TypeName.get(method.getReturnType()).equals(TypeName.get(Void.class))) {
+                                    builder.addStatement("super.$N()", method.getSimpleName().toString());
+                                    builder.addStatement(
+                                            "super.$N()", scopeMethod.getSimpleName().toString());
+                                  } else {
+                                    builder.addStatement("super.$N()", method.getSimpleName().toString());
+                                    builder.addStatement(
+                                        "return super.$N()", scopeMethod.getSimpleName().toString());
+                                  }
+                          methodSpecList.add(builder.build());
                         }));
 
     return methodSpecList;
@@ -140,6 +149,7 @@ public class ScopeClassGenerator {
                   .getEnclosedElements()
                   .stream()
                   .filter(element -> element instanceof ExecutableElement)
+                  .map(element -> (ExecutableElement) element)
                   .filter(
                       element ->
                           element.getSimpleName().toString().equals(getScopeMethodName(method))
@@ -148,24 +158,24 @@ public class ScopeClassGenerator {
                                       .getSimpleName()
                                       .toString()
                                       .startsWith(method.getSimpleName().toString())))
-                  .filter(element -> !method.getSimpleName().toString().contains("<init>"))
-                  .map(element -> (ExecutableElement) element)
+                  .filter(element -> !method.getSimpleName().toString().contains("<init>") &&
+                      method.getReturnType().equals((element).getReturnType()))
                   .forEach(
                       scopeMethod -> {
                         abstractFlag = true;
-                        MethodSpec methodSpec =
+                        MethodSpec.Builder methodSpecBuilder =
                             MethodSpec.methodBuilder(method.getSimpleName().toString())
                                 .addAnnotation(Override.class)
                                 .addModifiers(Modifier.PUBLIC)
-                                .addStatement("super.$N()", scopeMethod.getSimpleName().toString())
-                                .build();
-                        methodSpecList.add(methodSpec);
+                                .returns(TypeName.get(method.getReturnType()))
+                                .addStatement("super.$N()", scopeMethod.getSimpleName().toString());
+                        methodSpecList.add(methodSpecBuilder.build());
                       });
 
               if (!abstractFlag) {
                 throw new VerifyException(
                     String.format(
-                        "`%s` method is an abstract method. Should be implemented `%s` method.",
+                        "`%s` method is an abstract method. Should be implemented `%s` method or attached @Scoped annotation.",
                         method.getSimpleName().toString(), getScopeMethodName(method)));
               }
             });
