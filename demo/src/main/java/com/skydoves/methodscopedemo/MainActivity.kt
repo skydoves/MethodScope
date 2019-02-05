@@ -28,6 +28,8 @@ import com.skydoves.methodscopedemo.scopes.TestScope
 @TestScope(deeplink = DeepLink("https://www.naver.com"))
 abstract class MainActivity : AppCompatActivity() {
 
+    @Scoped(TestScope::class) private var tt = false
+
     var hello = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
