@@ -33,35 +33,37 @@ abstract class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        initialize()
+        initialize(1, "123")
     }
 
-    open fun initialize(): String {
+    open fun initialize(aa: Int, bb: String): String {
         hello = "This is "
         return hello
     }
 
     @Scoped(TestScope::class)
-    fun initializeTestScope333(): String {
+    fun initializeTestScope333(aa: Int, bb: String): String {
         hello += "TestScope"
         Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
         return hello
     }
 
-    fun initializeMyScope(): String {
+    fun initializeMyScope(aa: Int, bb: String): String {
         hello += "MyScope"
         Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
         return hello
     }
 
-    abstract fun test()
+    abstract fun test(aatt: Int, bbtt: String): String
 
     @Scoped(TestScope::class)
-    fun testTestScopeqwdqwd() {
+    fun testTestScopeqwdqwd(aatt: Int, bbtt: String): String {
         Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
+        return hello
     }
 
-    fun testMyScope() {
+    fun testMyScope(aatt: Int, bbtt: String): String {
+        return hello
     }
 
     companion object {

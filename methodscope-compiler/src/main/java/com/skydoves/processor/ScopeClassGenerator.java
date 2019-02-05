@@ -19,18 +19,17 @@ package com.skydoves.processor;
 import com.google.common.base.VerifyException;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 
-@SuppressWarnings({"FieldCanBeLocal", "WeakerAccess"})
+@SuppressWarnings({"FieldCanBeLocal", "WeakerAccess", "ConstantConditions"})
 public class ScopeClassGenerator {
 
   private final MethodScopeAnnotatedClass annotatedClazz;
@@ -108,24 +107,47 @@ public class ScopeClassGenerator {
                                         .getSimpleName()
                                         .toString()
                                         .startsWith(method.getSimpleName().toString())))
-                    .filter(element -> !method.getSimpleName().toString().contains("<init>") &&
-                        method.getReturnType().equals((element).getReturnType()))
+                    .filter(
+                        element ->
+                            !method.getSimpleName().toString().contains("<init>")
+                                && method.getReturnType().equals((element).getReturnType()))
+                    .filter(element -> !compareParameters(method, element))
                     .forEach(
                         scopeMethod -> {
                           MethodSpec.Builder builder =
                               MethodSpec.methodBuilder(method.getSimpleName().toString())
                                   .addAnnotation(Override.class)
                                   .addModifiers(Modifier.PUBLIC)
+                                  .addParameters(getParameterSpecs(method))
                                   .returns(TypeName.get(method.getReturnType()));
-                                  if (TypeName.get(method.getReturnType()).equals(TypeName.get(Void.class))) {
-                                    builder.addStatement("super.$N()", method.getSimpleName().toString());
-                                    builder.addStatement(
-                                            "super.$N()", scopeMethod.getSimpleName().toString());
-                                  } else {
-                                    builder.addStatement("super.$N()", method.getSimpleName().toString());
-                                    builder.addStatement(
-                                        "return super.$N()", scopeMethod.getSimpleName().toString());
-                                  }
+
+                          StringBuilder parameters = new StringBuilder();
+                          method
+                              .getParameters()
+                              .forEach(
+                                  parameter ->
+                                      parameters
+                                          .append(parameter.getSimpleName().toString())
+                                          .append(", "));
+                          parameters.replace(
+                              parameters.lastIndexOf(", "), parameters.lastIndexOf(", ") + 2, "");
+
+                          if (TypeName.get(method.getReturnType())
+                              .equals(TypeName.get(Void.class))) {
+                            builder.addStatement(
+                                "super.$N(" + parameters.toString() + ")",
+                                method.getSimpleName().toString());
+                            builder.addStatement(
+                                "super.$N(" + parameters.toString() + ")",
+                                scopeMethod.getSimpleName().toString());
+                          } else {
+                            builder.addStatement(
+                                "super.$N(" + parameters.toString() + ")",
+                                method.getSimpleName().toString());
+                            builder.addStatement(
+                                "return super.$N(" + parameters.toString() + ")",
+                                scopeMethod.getSimpleName().toString());
+                          }
                           methodSpecList.add(builder.build());
                         }));
 
@@ -158,18 +180,42 @@ public class ScopeClassGenerator {
                                       .getSimpleName()
                                       .toString()
                                       .startsWith(method.getSimpleName().toString())))
-                  .filter(element -> !method.getSimpleName().toString().contains("<init>") &&
-                      method.getReturnType().equals((element).getReturnType()))
+                  .filter(
+                      element ->
+                          !method.getSimpleName().toString().contains("<init>")
+                              && method.getReturnType().equals((element).getReturnType()))
+                  .filter(element -> !compareParameters(method, element))
                   .forEach(
                       scopeMethod -> {
                         abstractFlag = true;
-                        MethodSpec.Builder methodSpecBuilder =
+                        MethodSpec.Builder builder =
                             MethodSpec.methodBuilder(method.getSimpleName().toString())
                                 .addAnnotation(Override.class)
                                 .addModifiers(Modifier.PUBLIC)
-                                .returns(TypeName.get(method.getReturnType()))
-                                .addStatement("super.$N()", scopeMethod.getSimpleName().toString());
-                        methodSpecList.add(methodSpecBuilder.build());
+                                .addParameters(getParameterSpecs(method))
+                                .returns(TypeName.get(method.getReturnType()));
+
+                        StringBuilder parameters = new StringBuilder();
+                        method
+                            .getParameters()
+                            .forEach(
+                                parameter ->
+                                    parameters
+                                        .append(parameter.getSimpleName().toString())
+                                        .append(", "));
+                        parameters.replace(
+                            parameters.lastIndexOf(", "), parameters.lastIndexOf(", ") + 2, "");
+
+                        if (TypeName.get(method.getReturnType()).equals(TypeName.get(Void.class))) {
+                          builder.addStatement(
+                              "super.$N(" + parameters.toString() + ")",
+                              scopeMethod.getSimpleName().toString());
+                        } else {
+                          builder.addStatement(
+                              "return super.$N(" + parameters.toString() + ")",
+                              scopeMethod.getSimpleName().toString());
+                        }
+                        methodSpecList.add(builder.build());
                       });
 
               if (!abstractFlag) {
@@ -191,6 +237,22 @@ public class ScopeClassGenerator {
             annotation ->
                 annotation.toString().contains("@com.skydoves.methodscope.Scoped(")
                     && annotation.toString().contains(getScopeName()));
+  }
+
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+  private boolean compareParameters(ExecutableElement element0, ExecutableElement element1) {
+    if (element0.getParameters().size() != element1.getParameters().size()) return true;
+    for (int i = 0; i < element0.getParameters().size(); i++) {
+      if (!TypeName.get(element0.getParameters().get(0).asType())
+          .equals(TypeName.get(element1.getParameters().get(0).asType()))) return true;
+    }
+    return false;
+  }
+
+  private List<ParameterSpec> getParameterSpecs(ExecutableElement element) {
+    List<ParameterSpec> parameterSpecs = new ArrayList<>();
+    element.getParameters().forEach(parameter -> parameterSpecs.add(ParameterSpec.get(parameter)));
+    return parameterSpecs;
   }
 
   private String getScopeClassName() {
