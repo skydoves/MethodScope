@@ -23,10 +23,8 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -92,14 +90,32 @@ public class ScopeClassGenerator {
         .filter(variable -> variable instanceof VariableElement)
         .map(variable -> (VariableElement) variable)
         .filter(this::hasScopedAnnotation)
-        .forEach(variable -> {
-          FieldSpec.Builder builder =
-              FieldSpec.builder(TypeName.get(variable.asType()), variable.getSimpleName().toString());
-          variable.getModifiers().forEach(builder::addModifiers);
-          variable.getAnnotationMirrors().forEach(annotation ->
-            builder.addAnnotation(AnnotationSpec.get(annotation)));
-          fieldSpecs.add(builder.build());
-        });
+        .forEach(
+            variable -> {
+              if (variable.getModifiers().contains(Modifier.FINAL)) {
+                FieldSpec.Builder builder =
+                    FieldSpec.builder(
+                        TypeName.get(variable.asType()), variable.getSimpleName().toString());
+                variable.getModifiers().forEach(builder::addModifiers);
+                variable
+                    .getAnnotationMirrors()
+                    .forEach(annotation -> builder.addAnnotation(AnnotationSpec.get(annotation)));
+
+                if (variable.asType().getKind().isPrimitive()) {
+                  builder.initializer("$L", variable.getConstantValue());
+                } else if (variable.asType().toString().equals("java.lang.String")) {
+                  builder.initializer("$S", variable.getConstantValue());
+                } else {
+                  throw new VerifyException(
+                      String.format(
+                          "Scoped field `%s` should be primitive type or String.", variable));
+                }
+                fieldSpecs.add(builder.build());
+              } else {
+                throw new VerifyException(
+                    String.format("Scoped field `%s` should be final.", variable));
+              }
+            });
     return fieldSpecs;
   }
 
