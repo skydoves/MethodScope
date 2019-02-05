@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.skydoves.methodscopedemo.scopes;
+package com.skydoves.methodscopedemo.scopes
 
-import com.skydoves.methodscope.MethodScope;
+import com.skydoves.methodscope.MethodScope
 
 @MethodScope
-public @interface MyScope {}
+annotation class MyScope
