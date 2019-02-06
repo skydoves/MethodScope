@@ -181,16 +181,20 @@ public class ScopeClassGenerator {
 
                           if (TypeName.get(method.getReturnType())
                               .equals(TypeName.get(void.class))) {
-                            builder.addStatement(
-                                "super.$N(" + parameters.toString() + ")",
-                                method.getSimpleName().toString());
+                            if (!method.getSimpleName().equals(scopeMethod.getSimpleName())) {
+                              builder.addStatement(
+                                  "super.$N(" + parameters.toString() + ")",
+                                  method.getSimpleName().toString());
+                            }
                             builder.addStatement(
                                 "super.$N(" + parameters.toString() + ")",
                                 scopeMethod.getSimpleName().toString());
                           } else {
-                            builder.addStatement(
-                                "super.$N(" + parameters.toString() + ")",
-                                method.getSimpleName().toString());
+                            if (!method.getSimpleName().equals(scopeMethod.getSimpleName())) {
+                              builder.addStatement(
+                                  "super.$N(" + parameters.toString() + ")",
+                                  method.getSimpleName().toString());
+                            }
                             builder.addStatement(
                                 "return super.$N(" + parameters.toString() + ")",
                                 scopeMethod.getSimpleName().toString());
