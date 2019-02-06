@@ -2,7 +2,8 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![API](https://img.shields.io/badge/API-11%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=11)<br>
 
-Methodscope automatically generates classes that perform similar function tasks on a per-scope basis for a class. When similar and repetitive classes need to be created, the work what repetitive inheritance can be decreased.
+Methodscope automatically generates classes that perform similar function tasks on a per-scope basis for a class.<br>
+When similar and repetitive classes need to be created, the work what repetitive inheritance can be decreased.
 
 ## Including in your project
 [![Download](https://api.bintray.com/packages/devmagician/maven/methodscope/images/download.svg) ](https://bintray.com/devmagician/maven/methodscope/_latestVersion)
