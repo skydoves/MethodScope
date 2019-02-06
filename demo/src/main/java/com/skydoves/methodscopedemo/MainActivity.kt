@@ -23,51 +23,63 @@ import com.airbnb.deeplinkdispatch.DeepLink
 import com.skydoves.methodscope.Scoped
 import com.skydoves.methodscopedemo.scopes.MyScope
 import com.skydoves.methodscopedemo.scopes.TestScope
+import kotlinx.android.synthetic.main.activity_main_myscope.*
+import kotlinx.android.synthetic.main.activity_main_testscope.*
 
 @MyScope
 @TestScope(deeplink = DeepLink("https://www.naver.com"))
 abstract class MainActivity : AppCompatActivity() {
 
-    @Scoped(TestScope::class) private val tt = true
+    @Scoped(TestScope::class) private val flagTestScope = false
 
-    var hello = ""
+    private lateinit var hello: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        initialize(1, "123")
+
+        init() // calls the base method. this will calls the scoped method in the scoped class.
+        Toast.makeText(this, initWithArgument("Hello, this is"), Toast.LENGTH_SHORT).show()
     }
 
-    open fun initialize(aa: Int, bb: String): String {
-        hello = "This is "
-        return hello
+    /** the base method for the scoping. */
+    open fun init() {
+        hello = "hello, "
     }
 
-    @Scoped(TestScope::class)
-    fun initializeTestScope333(aa: Int, bb: String): String {
-        hello += "TestScope"
-        Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
-        return hello
-    }
+    /** scoped method for the scoping [MyScope] by [init]. */
+    @Scoped(MyScope::class)
+    fun initMyScope() {
+        // setContentView for MyScope
+        setContentView(R.layout.activity_main_myscope)
 
-    fun initializeMyScope(aa: Int, bb: String): String {
         hello += "MyScope"
-        Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
+        text_message_myscope.text = hello
+    }
+
+    /** scoped method for the scoping [TestScope] by [init]. */
+    @Scoped(TestScope::class)
+    fun initTestScope() {
+        // setContentView for TestScope
+        setContentView(R.layout.activity_main_testscope)
+
+        hello += "TestScope"
+        text_message_text_message_testscope.text = hello
+    }
+
+    /** the base method for the scoping. */
+    abstract fun initWithArgument(text: String): String
+
+    /** scoped method for the scoping [MyScope] by [init]. */
+    @Scoped(MyScope::class)
+    fun initWithArgumentMyScope(text: String): String {
+        hello = "$text MyScope2"
         return hello
     }
 
-    abstract fun test()
-
+    /** scoped method for the scoping [TestScope] by [init]. */
     @Scoped(TestScope::class)
-    fun testTestScopeqwdqwd() {
-        Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
-    }
-
-    fun testMyScope() {
-    }
-
-    companion object {
-        @TestAnnotation
-        private val qdqwdwd: String? = null
+    fun initWithArgumentTestScope(text: String): String {
+        hello = "$text TestScope2"
+        return hello
     }
 }
