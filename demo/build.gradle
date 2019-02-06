@@ -11,7 +11,6 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -31,17 +30,10 @@ android {
 dependencies {
     implementation "androidx.appcompat:appcompat:$accompatVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    implementation "com.airbnb:deeplinkdispatch:3.1.1"
 
-    // method scope
     implementation project(":methodscope")
     kapt project(":methodscope-compiler")
-
-    // DeepLink
-    implementation "com.airbnb:deeplinkdispatch:3.1.1"
-}
-
-repositories {
-    mavenCentral()
 }
 
 apply from: '../spotless.gradle'

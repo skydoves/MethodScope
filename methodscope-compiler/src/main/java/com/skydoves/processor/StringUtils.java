@@ -18,6 +18,7 @@ package com.skydoves.processor;
 
 import com.google.common.base.CaseFormat;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class StringUtils {
   public static String toUpperCamel(String name) {
     return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name);
