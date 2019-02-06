@@ -27,7 +27,7 @@ import kotlinx.android.synthetic.main.activity_main_myscope.*
 import kotlinx.android.synthetic.main.activity_main_testscope.*
 
 @MyScope
-@TestScope(deeplink = DeepLink("https://www.naver.com"))
+@TestScope(deeplink = DeepLink("https://github.com/skydoves"))
 abstract class MainActivity : AppCompatActivity() {
 
     @Scoped(TestScope::class) private val flagTestScope = false
