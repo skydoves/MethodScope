@@ -56,16 +56,14 @@ abstract class MainActivity : AppCompatActivity() {
         return hello
     }
 
-    abstract fun test(aatt: Int, bbtt: String): String
+    abstract fun test()
 
     @Scoped(TestScope::class)
-    fun testTestScopeqwdqwd(aatt: Int, bbtt: String): String {
+    fun testTestScopeqwdqwd() {
         Toast.makeText(this, hello, Toast.LENGTH_LONG).show()
-        return hello
     }
 
-    fun testMyScope(aatt: Int, bbtt: String): String {
-        return hello
+    fun testMyScope() {
     }
 
     companion object {

@@ -174,11 +174,13 @@ public class ScopeClassGenerator {
                                       parameters
                                           .append(parameter.getSimpleName().toString())
                                           .append(", "));
-                          parameters.replace(
-                              parameters.lastIndexOf(", "), parameters.lastIndexOf(", ") + 2, "");
+                          if (parameters.lastIndexOf(", ") != -1) {
+                            parameters.replace(
+                                parameters.lastIndexOf(", "), parameters.lastIndexOf(", ") + 2, "");
+                          }
 
                           if (TypeName.get(method.getReturnType())
-                              .equals(TypeName.get(Void.class))) {
+                              .equals(TypeName.get(void.class))) {
                             builder.addStatement(
                                 "super.$N(" + parameters.toString() + ")",
                                 method.getSimpleName().toString());
@@ -252,10 +254,12 @@ public class ScopeClassGenerator {
                                     parameters
                                         .append(parameter.getSimpleName().toString())
                                         .append(", "));
-                        parameters.replace(
-                            parameters.lastIndexOf(", "), parameters.lastIndexOf(", ") + 2, "");
+                        if (parameters.lastIndexOf(", ") != -1) {
+                          parameters.replace(
+                              parameters.lastIndexOf(", "), parameters.lastIndexOf(", ") + 2, "");
+                        }
 
-                        if (TypeName.get(method.getReturnType()).equals(TypeName.get(Void.class))) {
+                        if (TypeName.get(method.getReturnType()).equals(TypeName.get(void.class))) {
                           builder.addStatement(
                               "super.$N(" + parameters.toString() + ")",
                               scopeMethod.getSimpleName().toString());
