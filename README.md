@@ -33,7 +33,7 @@ Here is the kotlin code example.
 annotation class MyScope
 ```
 
-And attach the custom scope annotation on top of a class.<br>
+Attach the custom scope annotation on top of a class.<br>
 All of the public methods are the base method for the scoped like the `init()` method.<br>
 And designate scoping method using `@Scoped` annotation with the naming rule what startWith the base method's name.
 ```java
@@ -84,9 +84,9 @@ public class MyClass {
 ```
 After build the project, `MyClass_MyScope`, `MyClass_HisScope`, `MyClass_YourScope` classes will be auto-generated.
 
-### Scoping with return type and parameters
+### Scoping with a return type and parameters
 Methods that have a return type and parameters can be scoped method.<br>
-But the base method's return type and parameters are must be the same as the scoped method's one.
+The base method's return type and parameters are must be the same as the scoped method's one.
 ```java
 @MyScope
 abstract public class MyClass {
