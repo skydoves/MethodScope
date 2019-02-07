@@ -25,3 +25,5 @@ dependencies {
     implementation project(":methodscope")
     annotationProcessor project(":methodscope-compiler")
 }
+
+apply from: '../spotless.gradle'

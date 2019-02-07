@@ -22,9 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * MethodScope annotation should be used on the custom scope annotations.
- */
+/** MethodScope annotation should be used on the custom scope annotations. */
 @Documented
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
