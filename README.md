@@ -153,7 +153,7 @@ abstract class MainActivity : AppCompatActivity() {
     @Scoped(TestScope::class)
     fun initTestScope() {
         setContentView(R.layout.activity_main_testscope) // setContentView for TestScope.
-        text_message_myscope.text = hello + "TestScope" // changes text of the textView.
+        text_message_testscope.text = hello + "TestScope" // changes text of the textView.
     }
 }
 ```
