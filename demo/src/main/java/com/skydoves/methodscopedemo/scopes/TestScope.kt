@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.skydoves.methodscopedemo.scopes;
+package com.skydoves.methodscopedemo.scopes
 
-import com.airbnb.deeplinkdispatch.DeepLink;
-import com.skydoves.methodscope.MethodScope;
+import com.airbnb.deeplinkdispatch.DeepLink
+import com.skydoves.methodscope.MethodScope
 
 @MethodScope
-public @interface TestScope {
-  DeepLink deeplink();
-}
+annotation class TestScope(val deeplink: DeepLink)

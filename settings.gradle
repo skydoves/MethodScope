@@ -1,1 +1,1 @@
-include ':demo', ':methodscope', ':methodscope-compiler'
+include ':demo', ':methodscope', ':methodscope-compiler', ':demo-java'
