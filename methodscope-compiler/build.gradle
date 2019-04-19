@@ -15,7 +15,7 @@ publish {
 }
 
 dependencies {
-    implementation project(':methodscope')
+    implementation project(":methodscope")
     implementation "com.google.auto.service:auto-service:1.0-rc4"
     implementation "com.squareup:javapoet:1.11.1"
 }
