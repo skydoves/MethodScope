@@ -6,6 +6,8 @@
 Methodscope automatically generates classes that perform similar function tasks on a per-scope basis for a class.<br>
 When similar and repetitive classes need to be created, the work what repetitive inheritance can be decreased.
 
+![methodscope](https://user-images.githubusercontent.com/24237865/56455012-52faf980-6394-11e9-961d-5dd2d4d8344f.png)
+
 ## Including in your project
 [![Download](https://api.bintray.com/packages/devmagician/maven/methodscope/images/download.svg) ](https://bintray.com/devmagician/maven/methodscope/_latestVersion)
 ### Gradle
@@ -128,6 +130,10 @@ abstract public class MyClass {
 
 ## Android Project Usage
 MethodScope is useful to the Android project for creating similar screens.<br>
+
+![methodscope_android](https://user-images.githubusercontent.com/24237865/56455013-52faf980-6394-11e9-998b-41a45724fe37.png)
+
+### Basic example
 ```kotlin
 @MyScope
 @TestScope(deeplink = DeepLink("https://github.com/skydoves"))
